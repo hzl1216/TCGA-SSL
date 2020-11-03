@@ -158,6 +158,7 @@ def get_datasets(root, index, n_labeled, transform_train=None, transform_val=Non
         train_unlabeled_dataset = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=TransformTwice(transform_train,transform_train))
         train_unlabeled_dataset2 = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=transform_val)
     test_dataset = TCGA_DATASET( root, index, train=False,transform=transform_val)
+    print(Counter(train_labeled_dataset.targets), Counter(train_unlabeled_dataset.targets), Counter(test_dataset.targets))
     print('#Labeled: %d #Unlabeled: %d #val: %d #test: %d' % (len(train_labeled_dataset),
         len(train_unlabeled_dataset), 0, len(test_dataset)))
     return train_labeled_dataset, train_unlabeled_dataset, train_unlabeled_dataset2, None,test_dataset
