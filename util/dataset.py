@@ -1,11 +1,7 @@
 import numpy as np
-from PIL import Image
 import pandas as pd
-import os
-import torchvision
 import torch
 import torch.utils.data as data
-import _pickle as cPickle
 import random
 from collections import Counter
 NO_LABEL = -1
@@ -33,26 +29,26 @@ class TransformTwice:
 
 
 class TCGA_DATASET(data.Dataset):
-    def __init__(self,root,index=0,train=True,transform=None, target_transform=None, withGeo = False):
+    def __init__(self, root, index=0, train=True, transform=None, target_transform=None, isGeo=False):
         self.root = root
-        self.transform=transform
-        self.target_transform=target_transform
-        self.withGeo = withGeo
-        self.data =[]
-        self.targets=[]
-        if train:
-            df = pd.read_csv(root+'/train_%d.csv'%index)
+        self.transform = transform
+        self.target_transform = target_transform
+        self.data = []
+        self.targets= []
+        if isGeo:
+            df = pd.read_csv(root + '/geo_data.csv')
+            self.data = np.array(df.iloc[:, 1:])
+            self.targets = np.array([-1 for _ in range(len(self.data))])
         else:
-            df = pd.read_csv(root+'/test_%d.csv'%index)
+            if train:
+                df = pd.read_csv(root+'/train_%d.csv'%index)
+            else:
+                df = pd.read_csv(root+'/test_%d.csv'%index)
 
-        self.data = np.array(df.iloc[:, 1:])
-        self.targets=np.array(df.iloc[:, 0]-1)
-        if withGeo:
-            df_geo = pd.read_csv(root+'/geo_data.csv')
-            self.data = np.concatenate((self.data,np.array(df_geo)), axis=1)
-            self.targets = np.concatenate((self.targets,  np.array([-1 for _ in range(len(df_geo))])), axis=1)
+            self.data = np.array(df.iloc[:, 1:])
+            self.targets = np.array(df.iloc[:, 0]-1)
+
     def __getitem__(self, index):
-
         data = self.data[index]
         target = self.targets[index]
 
@@ -65,13 +61,11 @@ class TCGA_DATASET(data.Dataset):
         return data, int(target),index
 
     def __len__(self):
-        return  len(self.targets)
+        return len(self.targets)
 
-    def save_dir(self):
-        f = open('label_dict', 'wb')
-        cPickle.dump(self.label_dict, f)
 
 class TCGA_labeled(TCGA_DATASET):
+
     def __init__(self, tcga_dataset, indexs=None, transform=None, target_transform=None, ):
         self.data = tcga_dataset.data
         self.targets = tcga_dataset.targets
@@ -81,8 +75,8 @@ class TCGA_labeled(TCGA_DATASET):
             self.data = self.data[indexs]
             self.targets = np.array(self.targets)[indexs]
 
-
 class TCGA_unlabeled(TCGA_labeled):
+
     def __init__(self, tcga_dataset,indexs=None, transform=None, target_transform=None, ):
         super(TCGA_unlabeled, self).__init__( tcga_dataset, indexs,transform=transform, target_transform=target_transform)
         self.targets = np.array([-1 for _ in range(len(self.targets))])
@@ -126,7 +120,7 @@ class GaussianNoise(object):
         x += np.random.randn(length) * 0.15
         return x
 
-def get_tcga(root,index,n_labeled,transform_train=None,transform_val=None):
+def get_datasets(root, index, n_labeled, transform_train=None, transform_val=None, withGeo=False):
     def train_val_split_random(labels, n_labeled, randomtype='type'):
 
         train_labeled_idxs = []
@@ -153,17 +147,20 @@ def get_tcga(root,index,n_labeled,transform_train=None,transform_val=None):
 
         return train_labeled_idxs, train_unlabeled_idxs
 
-
-    base_dataset = TCGA_DATASET(root,index,withGeo=True)
-    train_labeled_idxs, train_unlabeled_idxs = train_val_split_random(base_dataset.targets,n_labeled)
-    train_labeled_dataset = TCGA_labeled(base_dataset, train_labeled_idxs,  transform=transform_train)
-    train_unlabeled_dataset = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=TransformTwice(transform_train,transform_train))
-    train_unlabeled_dataset2 = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=transform_val)
+    base_dataset = TCGA_DATASET(root,index)
+    if  withGeo:
+        train_labeled_dataset = TCGA_labeled(base_dataset, transform=transform_train)
+        train_unlabeled_dataset = TCGA_DATASET(base_dataset, transform=TransformTwice(transform_train,transform_train),isGeo=True)
+        train_unlabeled_dataset2 = TCGA_DATASET(base_dataset, transform=transform_val,isGeo=True)
+    else:
+        train_labeled_idxs, train_unlabeled_idxs = train_val_split_random(base_dataset.targets, n_labeled)
+        train_labeled_dataset = TCGA_labeled(base_dataset, train_labeled_idxs,  transform=transform_train)
+        train_unlabeled_dataset = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=TransformTwice(transform_train,transform_train))
+        train_unlabeled_dataset2 = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=transform_val)
     test_dataset = TCGA_DATASET( root, index, train=False,transform=transform_val)
-    print(Counter(base_dataset.targets),Counter(test_dataset.targets),Counter(train_labeled_dataset.targets))
-    print('#Labeled: %d #Unlabeled: %d #val: %d #test: %d' % (len(train_labeled_idxs),
-        len(train_unlabeled_idxs), len(train_unlabeled_idxs), len(test_dataset)))
-    return train_labeled_dataset, train_unlabeled_dataset,train_unlabeled_dataset2, None,test_dataset
+    print('#Labeled: %d #Unlabeled: %d #val: %d #test: %d' % (len(train_labeled_dataset),
+        len(train_unlabeled_dataset), 0, len(test_dataset)))
+    return train_labeled_dataset, train_unlabeled_dataset, train_unlabeled_dataset2, None,test_dataset
 
 if __name__ == '__main__':
     # dataset = TCGA_DATASET('./data')
