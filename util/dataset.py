@@ -33,19 +33,20 @@ class TransformTwice:
 
 
 class TCGA_DATASET(data.Dataset):
-    def __init__(self,root,index=0,train=True,transform=None, target_transform=None,):
+    def __init__(self,root,index=0,train=True,transform=None, target_transform=None, withGeo = False):
         self.root = root
         self.transform=transform
         self.target_transform=target_transform
+        self.withGeo = withGeo
         self.data =[]
         self.targets=[]
         if train:
             df = pd.read_csv(root+'/train_%d.csv'%index)
         else:
             df = pd.read_csv(root+'/test_%d.csv'%index)
-#        df = pd.read_csv(root+'/dlbc.csv')
-        
-            
+        if withGeo:
+            df_geo = pd.read_csv(root+'/train_%d.csv'%index)
+
         self.data = np.array(df.iloc[:, 1:])
         self.targets=np.array(df.iloc[:, 0]-1)
 
@@ -159,8 +160,8 @@ def get_tcga(root,index,n_labeled,transform_train=None,transform_val=None):
     train_unlabeled_dataset2 = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=transform_val)
     test_dataset = TCGA_DATASET( root, index, train=False,transform=transform_val)
     print(Counter(base_dataset.targets),Counter(test_dataset.targets),Counter(train_labeled_dataset.targets))
-
-    print(f"#Labeled: {len(train_labeled_dataset)}  #Test: {len(test_dataset)}")
+    print('#Labeled: %d #Unlabeled: %d #val: %d #test: %d' % (len(train_labeled_idxs),
+        len(train_unlabeled_idxs), len(train_unlabeled_idxs), len(test_dataset)))
     return train_labeled_dataset, train_unlabeled_dataset,train_unlabeled_dataset2, None,test_dataset
 
 if __name__ == '__main__':

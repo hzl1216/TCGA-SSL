@@ -24,7 +24,6 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,op
     labeled_train_iter = iter(train_labeled_loader)
     unlabeled_train_iter = iter(train_unlabeled_loader)
 
-
     meters = AverageMeterSet()
 
     # switch to train mode
@@ -142,7 +141,7 @@ def train(train_labeled_loader, model, ema_model,optimizer, ema_optimizer,epoch,
         else:
             targets_x = targets_x_onehot.cuda(non_blocking=True)
             outputs = model(inputs_x)
-            loss, class_loss, consistency_loss = class_criterion(outputs, outputs)
+            loss, class_loss, consistency_loss = criterion(outputs, outputs)
         meters.update('loss', loss.item())
 
         # compute gradient and do SGD step
@@ -169,7 +168,7 @@ def train(train_labeled_loader, model, ema_model,optimizer, ema_optimizer,epoch,
     return meters.averages()['loss/avg']
 
 
-def validate(val_loader, model, criterion, epoch):
+def validate(val_loader, model, criterion):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -178,7 +177,6 @@ def validate(val_loader, model, criterion, epoch):
 
     # switch to evaluate mode
     model.eval()
-    criterion = nn.CrossEntropyLoss().cuda()
     end = time.time()
     all_labels = None
     all_outputs = None
