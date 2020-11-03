@@ -28,7 +28,7 @@ def create_parser():
                         metavar='EPOCHS', help='checkpoint frequency in epochs, 0 to turn checkpointing off (default: 1)')
     parser.add_argument('--evaluation-epochs', default=1, type=int,
                         metavar='EPOCHS', help='evaluation frequency in epochs, 0 to turn evaluation off (default: 1)')
-    parser.add_argument('--print-freq', '-p', default=1280, type=int,
+    parser.add_argument('--print-freq', '-p', default=128, type=int,
                         metavar='N', help='print frequency (default: 10)')
     parser.add_argument('--resume', default='', type=str, metavar='PATH',
                         help='path to latest checkpoint (default: none)')
@@ -40,7 +40,7 @@ def create_parser():
                         help='evaluate model on evaluation set')
     parser.add_argument('--num-workers', type=int, default=12,
                         help='Number of workers')
-    parser.add_argument('--epoch-iteration', type=int, default=256,
+    parser.add_argument('--epoch-iteration', type=int, default=512,
                         help='train step of one epoch')
     parser.add_argument('--warmup-step', type=int, default=5,
                         help='Number of workers')
