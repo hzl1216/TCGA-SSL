@@ -35,7 +35,6 @@ def main():
 
     transform_val = transforms.Compose([
         ToTensor(),
-
     ])
 
     train_labeled_set, train_unlabeled_set, train_unlabeled_set2, val_set, test_set = get_datasets('./data',args.index, args.n_labeled,  transform_train=transform_train, transform_val=transform_val,withGeo=args.geo)
@@ -99,8 +98,8 @@ def main():
         
         if epoch >= args.ema_stage:
             print('train in semi-supervised stage2')
-            all_labels = get_u_label(ema_model, train_unlabeled_loader2,all_labels)
-            class_loss, cons_loss,all_labels = train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer, ema_optimizer,all_labels, epoch, criterion,scheduler)
+            all_labels = get_u_label(ema_model, train_unlabeled_loader2, all_labels)
+            class_loss, cons_loss = train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer, ema_optimizer,all_labels, epoch, criterion,scheduler)
         else:
             print(' train in semi-supervised stage1')
             cons_loss = 0

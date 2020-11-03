@@ -77,8 +77,7 @@ def merge_geo_tcga(tcga_data, geo_data, annotation_path):
     feature_name = np.array(feature_name)[idx2]
 
     kf = KFold(n_splits=5, shuffle=True, random_state=13)
-    scaler = preprocessing.MinMaxScaler()
-    features_t = scaler.fit_transform(features_t)
+    scaler = preprocessing.StandardScaler().fit(features_t)
 
     for index, (train_index, test_index) in enumerate(kf.split(features_t)):
         x_train, x_test, y_train, y_test = features_t[train_index], features_t[test_index],labels[train_index], labels[test_index]

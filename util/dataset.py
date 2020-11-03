@@ -94,7 +94,7 @@ class RandomErasing(object):
     -------------------------------------------------------------------------------------
     '''
 
-    def __init__(self, probability=0.5, sl=0.05, sh=0.3, erasing_value=0):
+    def __init__(self, probability=0.5, sl=0.05, sh=0.1, erasing_value=0):
         self.probability = probability
         self.erasing_value = erasing_value
         self.sl = sl

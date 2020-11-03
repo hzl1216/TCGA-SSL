@@ -20,7 +20,7 @@ def set_args(input_args):
     args = input_args
 
 
-def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer, ema_optimizer, all_labels,epoch,criterion, scheduler=None):
+def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer, ema_optimizer, all_labels, epoch, criterion, scheduler=None):
     labeled_train_iter = iter(train_labeled_loader)
     unlabeled_train_iter = iter(train_unlabeled_loader)
 
@@ -46,7 +46,7 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,op
         # measure data loading time
         meters.update('data_time', time.time() - end)
         inputs_x = inputs_x.cuda()
-#        inputs_u1 = inputs_u1.cuda()
+        inputs_u1 = inputs_u1.cuda()
         inputs_u2 = inputs_u2.cuda()
 
         batch_size = inputs_x.size(0)
@@ -93,7 +93,7 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,op
 
 
     ema_optimizer.step(bn=True)
-    return meters.averages()['class_loss/avg'], meters.averages()['cons_loss/avg'],all_labels
+    return meters.averages()['class_loss/avg'], meters.averages()['cons_loss/avg']
 
 def train(train_labeled_loader, model, ema_model,optimizer, ema_optimizer,epoch,criterion, scheduler=None):
     labeled_train_iter = iter(train_labeled_loader)
@@ -160,7 +160,7 @@ def train(train_labeled_loader, model, ema_model,optimizer, ema_optimizer,epoch,
                 'Epoch: [{0}][{1}/{2}]\t'
                 'Time {meters[batch_time]:.3f}\t'
                 'Data {meters[data_time]:.3f}\t'
-                'Cons {meters[loss]:.4f}\t'.format(
+                'Class {meters[loss]:.4f}\t'.format(
                     epoch, i, args.epoch_iteration, meters=meters))
 
 
