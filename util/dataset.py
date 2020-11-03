@@ -44,12 +44,14 @@ class TCGA_DATASET(data.Dataset):
             df = pd.read_csv(root+'/train_%d.csv'%index)
         else:
             df = pd.read_csv(root+'/test_%d.csv'%index)
-        if withGeo:
-            df_geo = pd.read_csv(root+'/train_%d.csv'%index)
+
 
         self.data = np.array(df.iloc[:, 1:])
         self.targets=np.array(df.iloc[:, 0]-1)
-
+        if withGeo:
+            df_geo = pd.read_csv(root+'/geo_data.csv')
+            self.data = np.concatenate((self.data,np.array(df_geo)), axis=1)
+            self.targets = np.concatenate((self.targets,  np.array([-1 for _ in range(len(df_geo))])), axis=1)
     def __getitem__(self, index):
 
         data = self.data[index]
