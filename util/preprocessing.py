@@ -108,7 +108,7 @@ def normalise_and_save(features,feature_name,labels,scaler=None,file_path='train
 
 if __name__ == '__main__':
     # feature_selection_and_sort_by_chromosome('data/TCGA_data.csv','data/Annotation.csv')
-    merge_geo_tcga('D:/TCGA-DATA/big_gene_expression_data.csv','D:/GEO数据/big_data_xiong.csv','D:/TCGA-DATA/Annotation.csv')
+    merge_geo_tcga('data/TCGA_data.csv', 'data/big_data_xiong.csv', 'data/Annotation.csv')
 
     '''
     big_table1 = pd.read_csv('D:/GEO数据/big_data_xiong.csv',nrows =5)
