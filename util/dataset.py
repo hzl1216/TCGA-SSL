@@ -155,7 +155,7 @@ def get_tcga(root,index,n_labeled,transform_train=None,transform_val=None):
         return train_labeled_idxs, train_unlabeled_idxs
 
 
-    base_dataset = TCGA_DATASET(root,index)
+    base_dataset = TCGA_DATASET(root,index,withGeo=True)
     train_labeled_idxs, train_unlabeled_idxs = train_val_split_random(base_dataset.targets,n_labeled)
     train_labeled_dataset = TCGA_labeled(base_dataset, train_labeled_idxs,  transform=transform_train)
     train_unlabeled_dataset = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=TransformTwice(transform_train,transform_train))
