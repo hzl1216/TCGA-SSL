@@ -148,7 +148,7 @@ def get_datasets(root, index, n_labeled, transform_train=None, transform_val=Non
         return train_labeled_idxs, train_unlabeled_idxs
 
     base_dataset = TCGA_DATASET(root,index)
-    if  withGeo:
+    if withGeo:
         train_labeled_dataset = TCGA_labeled(base_dataset, transform=transform_train)
         train_unlabeled_dataset = TCGA_DATASET(base_dataset, transform=TransformTwice(transform_train,transform_train),isGeo=True)
         train_unlabeled_dataset2 = TCGA_DATASET(base_dataset, transform=transform_val,isGeo=True)
@@ -164,7 +164,7 @@ def get_datasets(root, index, n_labeled, transform_train=None, transform_val=Non
 
 if __name__ == '__main__':
     # dataset = TCGA_DATASET('./data')
-    print(get_tcga('./data',1000))
+    print(get_datasets('./data',1000))
 
 
 

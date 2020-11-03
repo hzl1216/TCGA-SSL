@@ -7,7 +7,7 @@ def create_parser():
                         help='number of total epochs to run')
     parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                         help='manual epoch number (useful on restarts)')
-    parser.add_argument('--batch-size', default=60, type=int,
+    parser.add_argument('--batch-size', default=64, type=int,
                         metavar='N', help='labeled-batch size')
     parser.add_argument('--unsup-ratio', default=2, type=int,
                         metavar='N', help='The ratio between batch size of unlabeled data and labeled data')
