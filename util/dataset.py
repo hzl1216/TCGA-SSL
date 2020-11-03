@@ -37,7 +37,7 @@ class TCGA_DATASET(data.Dataset):
         self.targets= []
         if isGeo:
             df = pd.read_csv(root + '/geo_data.csv')
-            self.data = np.array(df.iloc[:, 1:])
+            self.data = np.array(df)
             self.targets = np.array([-1 for _ in range(len(self.data))])
         else:
             if train:
