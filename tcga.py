@@ -38,7 +38,7 @@ def main():
 
     ])
 
-    train_labeled_set, train_unlabeled_set, train_unlabeled_set2, val_set, test_set = get_datasets('./data',args.index, args.n_labeled,  transform_train=transform_train, transform_val=transform_val)
+    train_labeled_set, train_unlabeled_set, train_unlabeled_set2, val_set, test_set = get_datasets('./data',args.index, args.n_labeled,  transform_train=transform_train, transform_val=transform_val,withGeo=args.geo)
 
     train_labeled_loader = data.DataLoader(train_labeled_set, batch_size=args.batch_size,  num_workers=args.num_workers,shuffle=True,drop_last=True)
     train_unlabeled_loader = data.DataLoader(train_unlabeled_set, batch_size=args.batch_size*args.unsup_ratio, shuffle=True,

@@ -59,4 +59,6 @@ def create_parser():
     parser.add_argument('--tsa', type=int, default=0.9)
     parser.add_argument('--dataset', type=str, default='tcga')
     parser.add_argument('--index', type=int, default=0)
+    parser.add_argument('--geo', default=False, type=str2bool,
+                        help='use geo dataset as unlabeled set', metavar='BOOL')
     return parser.parse_args()
