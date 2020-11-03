@@ -150,8 +150,8 @@ def get_datasets(root, index, n_labeled, transform_train=None, transform_val=Non
     base_dataset = TCGA_DATASET(root,index)
     if withGeo:
         train_labeled_dataset = TCGA_labeled(base_dataset, transform=transform_train)
-        train_unlabeled_dataset = TCGA_DATASET(base_dataset, transform=TransformTwice(transform_train,transform_train),isGeo=True)
-        train_unlabeled_dataset2 = TCGA_DATASET(base_dataset, transform=transform_val,isGeo=True)
+        train_unlabeled_dataset = TCGA_DATASET(root, transform=TransformTwice(transform_train,transform_train),isGeo=True)
+        train_unlabeled_dataset2 = TCGA_DATASET(root, transform=transform_val,isGeo=True)
     else:
         train_labeled_idxs, train_unlabeled_idxs = train_val_split_random(base_dataset.targets, n_labeled)
         train_labeled_dataset = TCGA_labeled(base_dataset, train_labeled_idxs,  transform=transform_train)
