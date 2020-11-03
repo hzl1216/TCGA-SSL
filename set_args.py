@@ -28,7 +28,7 @@ def create_parser():
                         metavar='EPOCHS', help='checkpoint frequency in epochs, 0 to turn checkpointing off (default: 1)')
     parser.add_argument('--evaluation-epochs', default=1, type=int,
                         metavar='EPOCHS', help='evaluation frequency in epochs, 0 to turn evaluation off (default: 1)')
-    parser.add_argument('--print-freq', '-p', default=128, type=int,
+    parser.add_argument('--print-freq', '-p', default=1280, type=int,
                         metavar='N', help='print frequency (default: 10)')
     parser.add_argument('--resume', default='', type=str, metavar='PATH',
                         help='path to latest checkpoint (default: none)')

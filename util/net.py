@@ -65,7 +65,7 @@ class TemporalConvNet(nn.Module):
 
 class TCN(nn.Module):
 
-    def __init__(self, input_size, output_size, num_channels,length=626,step=16,
+    def __init__(self, input_size, output_size, num_channels,length=391,step=16,
                  kernel_size=2, dropout=0.5):
         super(TCN, self).__init__()
         self.length = length
@@ -147,7 +147,7 @@ class ResNet(nn.Module):
 
         self.avgpool = nn.AvgPool1d(7, stride=7)
         self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(11264,num_classes)
+        self.fc = nn.Linear(7168,num_classes)
         
         for m in self.modules():
             if isinstance(m, nn.Conv1d):

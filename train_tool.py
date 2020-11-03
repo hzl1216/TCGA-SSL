@@ -47,17 +47,15 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,op
         # measure data loading time
         meters.update('data_time', time.time() - end)
         inputs_x = inputs_x.cuda()
-        inputs_u1 = inputs_u1.cuda()
+#        inputs_u1 = inputs_u1.cuda()
         inputs_u2 = inputs_u2.cuda()
 
         batch_size = inputs_x.size(0)
         targets_x_onehot = torch.zeros(batch_size, 33).scatter_(1, targets_x.view(-1, 1), 1)
         targets_x = targets_x.cuda(non_blocking=True)
 
-#        outputs_u1 = model(inputs_u1)
-        outputs_u2 = ema_model(inputs_u2)
-        outputs_u1=outputs_u2
-        targets_u = torch.softmax(outputs_u2,dim=1)
+        targets_u = torch.FloatTensor(all_labels[unlabel_index,:]).cuda()
+       
         targets_u = sharpen(targets_u)
         targets_u = targets_u.detach()
         if args.mixup:
@@ -65,7 +63,7 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,op
             all_inputs = torch.cat([inputs_x,  inputs_u2], dim=0)
             all_targets = torch.cat([targets_x,  targets_u], dim=0)
             outputs, targets = mixup(all_inputs, all_targets, batch_size, model, epoch + i / args.epoch_iteration)
-            loss, class_loss, consistency_loss = semiloss_mixup(outputs, targets,outputs_u2,outputs_u1,epoch + i / args.epoch_iteration,criterion)
+            loss, class_loss, consistency_loss = semiloss_mixup(outputs, targets,targets_u,targets_u,epoch + i / args.epoch_iteration,criterion)
         else:
             targets_x = targets_x_onehot.cuda(non_blocking=True)
             outputs_x = model(inputs_x)
@@ -79,7 +77,6 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,op
         loss.backward()
         optimizer.step()
         ema_optimizer.step()
-        ema_optimizer.step(bn=True)
         if scheduler is not None:
             scheduler.step()
         # measure elapsed time
@@ -96,7 +93,7 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,op
                     epoch, i, args.epoch_iteration, meters=meters))
 
 
-#    ema_optimizer.step(bn=True)
+    ema_optimizer.step(bn=True)
     return meters.averages()['class_loss/avg'], meters.averages()['cons_loss/avg'],all_labels
 
 def train(train_labeled_loader, model, ema_model,optimizer, ema_optimizer,epoch,criterion, scheduler=None):

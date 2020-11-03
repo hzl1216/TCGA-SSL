@@ -16,6 +16,7 @@ def main():
 #        model = TCN(input_size=1, output_size=33, num_channels=[32] *8, kernel_size=2)
         model = ResNet50(33)
         model = nn.DataParallel(model).cuda()
+#        model.cuda()
         if ema:
             for param in model.parameters():
                 param.detach_()
@@ -47,7 +48,7 @@ def main():
                                             num_workers=args.num_workers)
     if args.val_size>0:
         val_loader = data.DataLoader(val_set, batch_size=args.batch_size*args.unsup_ratio, shuffle=False, num_workers=args.num_workers)
-    test_loader = data.DataLoader(test_set, batch_size=args.batch_size*args.unsup_ratio, shuffle=False, num_workers=args.num_workers)
+    test_loader = data.DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     model = create_model()
     ema_model = create_model(ema=True)
     tmp_model= create_model(ema=True)
@@ -99,7 +100,7 @@ def main():
         
         if epoch >= args.ema_stage:
             print (' train in semi-supervised stage2')
-#            all_labels = get_u_label(ema_model, train_unlabeled_loader2,all_labels)
+            all_labels = get_u_label(ema_model, train_unlabeled_loader2,all_labels)
             class_loss, cons_loss,all_labels = train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer, ema_optimizer,all_labels, epoch, criterion,scheduler)
         else:
             print (' train in semi-supervised stage1')
@@ -120,7 +121,7 @@ def main():
             if test_acc>best_acc:
                 best_acc=test_acc
                 best_epoch=epoch
-            if epoch>best_epoch+20:
+            if epoch>best_epoch+100:
                 break
             print("Evaluating the EMA model:")
             if args.val_size > 0:
@@ -131,15 +132,14 @@ def main():
             print("--- validation in %s seconds ---" % (time.time() - start_time))
             logger.append([epoch, class_loss, cons_loss, ema_val_loss, ema_val_acc,ema_test_loss, ema_test_acc])
 
-        if args.checkpoint_epochs and (epoch + 1) % args.checkpoint_epochs == 0:
-            save_checkpoint(
+    save_checkpoint(
                 '%s_%d'%(title, args.n_labeled),
                 {
                 'epoch': epoch + 1,
                 'state_dict': model.state_dict(),
                 'ema_state_dict': ema_model.state_dict(),
                 'optimizer' : optimizer.state_dict(),
-            }, 'checkpoint_path', epoch + 1)
+            }, 'checkpoint_path', args.index)
 
 if __name__ == '__main__':
     dirs = [ 'result','data','checkpoint_path']
@@ -147,6 +147,7 @@ if __name__ == '__main__':
         if os.path.exists(path) is False:
             os.makedirs(path) 
     args = create_parser()
+    print('train in %d folf'%args.index)
 #    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     np.random.seed(args.seed)
     torch.manual_seed(args.seed) 
