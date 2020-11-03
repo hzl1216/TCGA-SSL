@@ -208,17 +208,14 @@ def validate(val_loader, model, criterion):
             end = time.time()
 
             # plot progress
-            if batch_idx % args.print_freq == 0:
-                print(
-                    '{batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
-                        batch=batch_idx + 1,
-                        size=len(val_loader),
-                        data=data_time.avg,
-                        bt=batch_time.avg,
-                        loss=losses.avg,
-                        top1=top1.avg,
-                        top5=top5.avg,
-                    ))
+    print(
+        ' Data: {data:.3f}s | Batch: {bt:.3f}s | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+            data=data_time.avg,
+            bt=batch_time.avg,
+            loss=losses.avg,
+            top1=top1.avg,
+            top5=top5.avg,
+        ))
 #    conf_matrix = confusion_matrix(all_outputs, all_labels)
 #    plot_confusion_matrix(conf_matrix.numpy(), epoch)
     return losses.avg, top1.avg
