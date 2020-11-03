@@ -46,7 +46,6 @@ def merge_geo_tcga(tcga_data, geo_data, annotation_path):
     feature_name_t = [feature.split('|')[0] for feature in feature_name_t]
     feature_name_g = list(geo_table)[1:]
     labels = np.array(tcga_table.iloc[:, 0])
-    labels = np.array(tcga_table.iloc[:, 0])
     annotation = pd.read_csv(annotation_path, dtype=str)
     gene_id_annotation = list(annotation.loc[:, "gene"])
     idx_t = []
@@ -108,7 +107,7 @@ def normalise_and_save(features,feature_name,labels,scaler=None,file_path='train
 
 if __name__ == '__main__':
     # feature_selection_and_sort_by_chromosome('data/TCGA_data.csv','data/Annotation.csv')
-    merge_geo_tcga('data/TCGA_data.csv', 'data/big_data_xiong.csv', 'data/Annotation.csv')
+    merge_geo_tcga('data/big_gene_expression_data.csv', 'data/big_data_xiong.csv', 'data/Annotation.csv')
 
     '''
     big_table1 = pd.read_csv('D:/GEO数据/big_data_xiong.csv',nrows =5)

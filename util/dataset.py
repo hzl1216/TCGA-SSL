@@ -45,7 +45,6 @@ class TCGA_DATASET(data.Dataset):
         else:
             df = pd.read_csv(root+'/test_%d.csv'%index)
 
-
         self.data = np.array(df.iloc[:, 1:])
         self.targets=np.array(df.iloc[:, 0]-1)
         if withGeo:
