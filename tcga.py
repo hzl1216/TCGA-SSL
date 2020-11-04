@@ -32,7 +32,6 @@ def main():
 
     ])
     transform_strong = transforms.Compose([
-        RandomErasing(),
         GaussianNoise(),
         ToTensor(),
 
@@ -102,7 +101,7 @@ def main():
         if epoch >= args.ema_stage:
             print('train in semi-supervised stage2')
             all_labels = get_u_label(ema_model, train_unlabeled_loader2, all_labels)
-            class_loss, cons_loss = train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer, ema_optimizer,all_labels, epoch, criterion,scheduler)
+            class_loss, cons_loss = train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer,ema_optimizer, all_labels, epoch, criterion,scheduler)
         else:
             print(' train in semi-supervised stage1')
             cons_loss = 0
@@ -119,8 +118,8 @@ def main():
             test_loss, test_acc = validate(test_loader, model, criterion)
             print("--- validation in %s seconds ---" % (time.time() - start_time))
             logger.append([epoch, class_loss, cons_loss, val_loss, val_acc,test_loss, test_acc])
-            if test_acc> best_acc:
-                best_acc= test_acc
+            if test_acc > best_acc:
+                best_acc = test_acc
                 best_epoch=epoch
             if epoch > best_epoch+100:
                 break
