@@ -33,7 +33,7 @@ def feature_selection_and_sort_by_chromosome(data, annotation_path):
     features = features[:, idx2]
     feature_name=np.array(feature_name)[idx2]
 
-    kf= KFold(n_splits=5, shuffle=True, random_state=13)
+    kf= KFold(n_splits=10, shuffle=True, random_state=13)
     for index, (train_index, test_index) in enumerate(kf.split(features)):
         x_train, x_test, y_train,y_test = features[train_index],features[test_index],labels[train_index],labels[test_index]
         scaler = normalise_and_save(x_train,feature_name,y_train ,file_path='data/train_%d.csv'%index)
