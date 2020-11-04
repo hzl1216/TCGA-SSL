@@ -9,7 +9,7 @@ def create_parser():
                         help='manual epoch number (useful on restarts)')
     parser.add_argument('--batch-size', default=64, type=int,
                         metavar='N', help='labeled-batch size')
-    parser.add_argument('--unsup-ratio', default=2, type=int,
+    parser.add_argument('--unsup-ratio', default=4, type=int,
                         metavar='N', help='The ratio between batch size of unlabeled data and labeled data')
     parser.add_argument('--lr', '--learning-rate', default=0.01, type=float)
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,

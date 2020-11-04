@@ -48,26 +48,37 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,op
         inputs_x = inputs_x.cuda()
         inputs_u1 = inputs_u1.cuda()
         inputs_u2 = inputs_u2.cuda()
+        all_inputs = torch.cat([inputs_u1, inputs_u2], dim=0)
 
         batch_size = inputs_x.size(0)
-        targets_x_onehot = torch.zeros(batch_size, 33).scatter_(1, targets_x.view(-1, 1), 1)
-        targets_x = targets_x.cuda(non_blocking=True)
+        targets_x = torch.zeros(batch_size, 33).scatter_(1, targets_x.view(-1, 1), 1).cuda(non_blocking=True)
+
 
         targets_u = torch.FloatTensor(all_labels[unlabel_index,:]).cuda()
-       
         targets_u = sharpen(targets_u)
         targets_u = targets_u.detach()
-        if args.mixup:
-            targets_x = targets_x_onehot.cuda(non_blocking=True)
-            all_inputs = torch.cat([inputs_x,  inputs_u2], dim=0)
-            all_targets = torch.cat([targets_x,  targets_u], dim=0)
-            outputs, targets = mixup(all_inputs, all_targets, batch_size, model, epoch + i / args.epoch_iteration)
-            loss, class_loss, consistency_loss = semiloss_mixup(outputs, targets,targets_u,targets_u,epoch + i / args.epoch_iteration,criterion)
-        else:
-            targets_x = targets_x_onehot.cuda(non_blocking=True)
-            outputs_x = model(inputs_x)
-            outputs_u = model(inputs_u1)
-            loss, class_loss, consistency_loss = semiloss(outputs_x, targets_x, outputs_u1, outputs_u2.detach(),epoch + i / args.epoch_iteration)
+
+
+        length = get_unsup_size(epoch+i / args.epoch_iteration)
+        input_a = torch.cat([inputs_x, inputs_u1[: length]], dim=0)
+        target_a = torch.cat([targets_x, targets_u[: length]], dim=0)
+        l = np.random.beta(args.alpha, args.alpha)
+        l = max(l,1-l)
+        idx = torch.randperm(input_a.size(0))
+        input_b = input_a[idx]
+        target_b = target_a[idx]
+        mixed_inputs = l * input_a + (1 - l) * input_b
+        mixed_targets = l * target_a + (1 - l) * target_b
+        del input_a,target_a,input_b,target_b
+        all_inputs = torch.cat([all_inputs, mixed_inputs], dim=0)
+        logits = model(all_inputs)
+        outputs_u1, outputs_u2 = logits[:args.batch_size * args.unsup_ratio * 2].chunk(2)
+        outputs_mixup = logits[args.batch_size * args.unsup_ratio * 2:]
+        del logits
+        loss, class_loss, consistency_loss = semiloss_mixup(outputs_mixup,mixed_targets, outputs_u2, outputs_u1.detach(), epoch)
+
+
+
         meters.update('loss', loss.item())
         meters.update('class_loss', class_loss.item())
         meters.update('cons_loss', consistency_loss.item())
@@ -119,12 +130,11 @@ def train(train_labeled_loader, model, ema_model,optimizer, ema_optimizer,epoch,
         inputs_x = inputs_x.cuda()
 
         batch_size = inputs_x.size(0)
-        targets_x_onehot = torch.zeros(batch_size, 33).scatter_(1, targets_x.view(-1, 1), 1)
-        targets_x = targets_x.cuda(non_blocking=True)
+        targets_x = torch.zeros(batch_size, 33).scatter_(1, targets_x.view(-1, 1), 1).cuda(non_blocking=True)
+
 
 
         if args.mixup:
-            targets_x = targets_x_onehot.cuda(non_blocking=True)
             l = np.random.beta(args.alpha, args.alpha)
             idx = torch.randperm(targets_x.size(0))
             input_a, input_b = inputs_x, inputs_x[idx]
@@ -139,7 +149,6 @@ def train(train_labeled_loader, model, ema_model,optimizer, ema_optimizer,epoch,
             loss = -torch.mean(torch.sum(F.log_softmax(outputs, dim=1) * mixed_target, dim=1))
 #            loss = criterion(outputs,mixed_target)
         else:
-            targets_x = targets_x_onehot.cuda(non_blocking=True)
             outputs = model(inputs_x)
             loss, class_loss, consistency_loss = criterion(outputs, outputs)
         meters.update('loss', loss.item())
@@ -326,24 +335,21 @@ def semiloss(outputs_x, targets_x, outputs_u, targets_u,epoch):
     return class_loss + args.consistency_weight*consistency_loss, class_loss, consistency_loss
 
 
-def semiloss_mixup(outputs_x, targets_x, outputs_u, targets_u, epoch,criterion):
-    probs_u = torch.softmax(outputs_u, dim=1)
+def semiloss_mixup(outputs_x, targets_x, outputs_u, targets_u, epoch):
+    probs_u = torch.softmax(targets_u, dim=1)
     class_loss = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
-#    class_loss = criterion(outputs_x,targets_x)
     if args.confidence_thresh > 0:
-        loss_mask2 = torch.max(probs_u,dim=1)[0].gt(args.confidence_thresh).float().detach() 
-        consistency_loss = torch.mean(torch.sum(F.softmax(targets_u,1) * (F.log_softmax(targets_u, 1) - F.log_softmax(outputs_u, dim=1)), 1)*loss_mask2)
+        loss_mask = torch.max(probs_u,dim=1)[0].gt(args.confidence_thresh).float().detach()
+        consistency_loss = -torch.sum(F.log_softmax(outputs_u, dim=1) * F.softmax(targets_u, 1), dim=1)
+        #consistency_loss = torch.sum(F.softmax(targets_u, 1) * (F.log_softmax(targets_u, 1) - F.log_softmax(outputs_u, dim=1)),1)
+        consistency_loss = torch.sum(consistency_loss*loss_mask)/torch.max(torch.sum(loss_mask), torch.tensor(1.))
     else:
-        consistency_loss = torch.mean(torch.sum(F.softmax(targets_u,1) * (F.log_softmax(targets_u, 1) - F.log_softmax(outputs_u, dim=1)), 1))
+        consistency_loss = -torch.mean(torch.sum(F.log_softmax(outputs_u, dim=1) * F.softmax(targets_u, 1), dim=1))
     if args.entropy_cost >0:
-        entropy_cost = ramps.linear_rampup(epoch,args.epochs)*args.entropy_cost
-        entropy_loss =- entropy_cost*  torch.mean(torch.sum(torch.mul(F.softmax(outputs_u,dim=1), F.log_softmax(outputs_u,dim=1)),dim=1))
+        entropy_loss = -args.entropy_cost * torch.mean(torch.sum(torch.mul(F.softmax(outputs_u,dim=1), F.log_softmax(outputs_u,dim=1)),dim=1))
     else:
         entropy_loss = 0
-    consistency_weight=args.consistency_weight
-#    consistency_loss = torch.mean((torch.softmax(targets_u,dim=1)-probs_u)**2)
-#    consistency_weight = ramps.linear_rampup(epoch,args.epochs)*args.consistency_weight
-    return class_loss + consistency_weight * consistency_loss + entropy_loss, class_loss, consistency_loss
+    return class_loss + args.consistency_weight * consistency_loss + entropy_loss, class_loss, consistency_loss
 
 
 def interleave_offsets(batch, nu):

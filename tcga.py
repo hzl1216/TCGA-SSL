@@ -14,8 +14,7 @@ def main():
 
 #        model = TCN(input_size=1, output_size=33, num_channels=[32] *8, kernel_size=2)
         model = ResNet50(33)
-        model = nn.DataParallel(model).cuda()
-#        model.cuda()
+        model.cuda()
         if ema:
             for param in model.parameters():
                 param.detach_()
@@ -32,12 +31,17 @@ def main():
         ToTensor(),
 
     ])
+    transform_strong = transforms.Compose([
+        RandomErasing(),
+        GaussianNoise(),
+        ToTensor(),
 
+    ])
     transform_val = transforms.Compose([
         ToTensor(),
     ])
 
-    train_labeled_set, train_unlabeled_set, train_unlabeled_set2, val_set, test_set = get_datasets('./data',args.index, args.n_labeled,  transform_train=transform_train, transform_val=transform_val,withGeo=args.geo)
+    train_labeled_set, train_unlabeled_set, train_unlabeled_set2, val_set, test_set = get_datasets('./data',args.index, args.n_labeled,  transform_train=transform_train,transform_strong=transform_strong, transform_val=transform_val,withGeo=args.geo)
 
     train_labeled_loader = data.DataLoader(train_labeled_set, batch_size=args.batch_size,  num_workers=args.num_workers,shuffle=True,drop_last=True)
     train_unlabeled_loader = data.DataLoader(train_unlabeled_set, batch_size=args.batch_size*args.unsup_ratio, shuffle=True,
@@ -52,7 +56,6 @@ def main():
     tmp_model= create_model(ema=True)
 
     criterion = nn.CrossEntropyLoss().cuda()
-#     criterion = FocalLoss(33).cuda()
     if args.optimizer == 'Adam':
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
     else:

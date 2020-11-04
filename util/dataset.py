@@ -120,7 +120,7 @@ class GaussianNoise(object):
         x += np.random.randn(length) * 0.15
         return x
 
-def get_datasets(root, index, n_labeled, transform_train=None, transform_val=None, withGeo=False):
+def get_datasets(root, index, n_labeled, transform_train=None, transform_strong=None,transform_val=None, withGeo=False):
     def train_val_split_random(labels, n_labeled, randomtype='type'):
 
         train_labeled_idxs = []
@@ -150,7 +150,7 @@ def get_datasets(root, index, n_labeled, transform_train=None, transform_val=Non
     base_dataset = TCGA_DATASET(root,index)
     if withGeo:
         train_labeled_dataset = TCGA_labeled(base_dataset, transform=transform_train)
-        train_unlabeled_dataset = TCGA_DATASET(root, transform=TransformTwice(transform_train,transform_train),isGeo=True)
+        train_unlabeled_dataset = TCGA_DATASET(root, transform=TransformTwice(transform_train,transform_strong),isGeo=True)
         train_unlabeled_dataset2 = TCGA_DATASET(root, transform=transform_val,isGeo=True)
     else:
         train_labeled_idxs, train_unlabeled_idxs = train_val_split_random(base_dataset.targets, n_labeled)
