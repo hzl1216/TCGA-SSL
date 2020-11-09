@@ -86,10 +86,10 @@ def main(dataset):
         test_loss, test_acc = validate(test_loader, model, criterion, args.start_epoch)
         print("=> loaded checkpoint '{}' (epoch {})".format(args.resume, checkpoint['epoch']))
 
-        logger = Logger(os.path.join(args.out_path, '%s_log_%d.txt'%(dataset,args.n_labeled)), title=title, resume=True)
+        logger = Logger(os.path.join(args.out_path, '%s_log_%d_%d.txt'%(dataset,args.n_labeled,args.index)), title=title, resume=True)
         logger.append([args.start_epoch, 0, 0, val_loss, val_acc,test_loss, test_acc])
     else:
-        logger = Logger(os.path.join(args.out_path, '%s_log_%d.txt'%(dataset,args.n_labeled)), title=title)
+        logger = Logger(os.path.join(args.out_path, '%s_log_%d_%d.txt'%(dataset,args.n_labeled,args.index)), title=title)
         logger.set_names(['epoch', 'Train_class_loss',  'Train_consistency_loss', 'Val_Loss', 'Val_Acc.', 'Test_Loss', 'Test_Acc.'])
 
     for epoch in range(args.start_epoch, args.epochs):
