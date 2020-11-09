@@ -61,4 +61,5 @@ def create_parser():
     parser.add_argument('--index', type=int, default=0)
     parser.add_argument('--geo', default=False, type=str2bool,
                         help='use geo dataset as unlabeled set', metavar='BOOL')
+    parser.add_argument('--softmax-temp', default=0.4, type=float, metavar='softmax-temp')
     return parser.parse_args()
