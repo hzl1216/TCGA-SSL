@@ -9,10 +9,10 @@ def create_parser():
                         help='manual epoch number (useful on restarts)')
     parser.add_argument('--batch-size', default=64, type=int,
                         metavar='N', help='labeled-batch size')
-    parser.add_argument('--unsup-ratio', default=4, type=int,
+    parser.add_argument('--unsup-ratio', default=5, type=int,
                         metavar='N', help='The ratio between batch size of unlabeled data and labeled data')
-    parser.add_argument('--lr', '--learning-rate', default=0.01, type=float)
-    parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
+    parser.add_argument('--lr', '--learning-rate', default=0.03, type=float)
+    parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float,
                         metavar='W', help='weight decay (default: 1e-4)')
     parser.add_argument('--ema-decay', default=0.99, type=float, metavar='ALPHA',
                         help='ema variable decay rate (default: 0.999)')
@@ -53,9 +53,9 @@ def create_parser():
     parser.add_argument('--confidence-thresh', default=-1,type=float)
     parser.add_argument('--scheduler', default='linear')
     parser.add_argument('--ema-stage', type=int, default=10)
-    parser.add_argument('--optimizer', type=str, default='Adam')
+    parser.add_argument('--optimizer', type=str, default='sgd')
     parser.add_argument('--val-size', type=int, default=-1)
-    parser.add_argument('--mixup-size', type=int, default=2)
+    parser.add_argument('--mixup-size', type=int, default=5)
     parser.add_argument('--tsa', type=int, default=0.9)
     parser.add_argument('--dataset', type=str, default='tcga')
     parser.add_argument('--index', type=int, default=0)
