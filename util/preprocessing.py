@@ -106,7 +106,7 @@ def split_geo(geo_data, annotation_path):
 
     print('remove the features that  Variance is low than threshold')
     selector = VarianceThreshold(threshold=1)
-    selector.fit(feature_name_g)
+    selector.fit(features_g)
     idx2 = selector.get_support(indices=True)
     features_g = features_g[:, idx2]
     feature_name = np.array(feature_name)[idx2]
@@ -141,8 +141,8 @@ def normalise_and_save(features, feature_name, labels, scaler=None, file_path='t
 if __name__ == '__main__':
 # feature_selection_and_sort_by_chromosome('data/TCGA_data.csv','data/Annotation.csv')
 #   merge_geo_tcga('data/big_gene_expression_data.csv', 'data/big_data_xiong.csv', 'data/Annotation.csv')
-    split_geo( 'data/big_data_xiong.csv', 'data/Annotation.csv')
-
+ #   split_geo( 'data/big_data_xiong.csv', 'data/Annotation.csv')
+    split_geo('D:/GEO数据/big_data_xiong.csv', 'D:/TCGA-DATA/Annotation.csv')
 
 
 
