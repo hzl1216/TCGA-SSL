@@ -12,7 +12,7 @@ def main(dataset):
         print("=> creating {ema}model ".format(
             ema='EMA ' if ema else ''))
 
-#        model = TCN(input_size=1, output_size=33, num_channels=[32] *8, kernel_size=2)
+#        model = TCN(input_size=1, output_size=34, num_channels=[32] *8, kernel_size=2)
         model = ResNet50(34)
         model.cuda()
         if ema:
@@ -67,7 +67,7 @@ def main(dataset):
         scheduler =  WarmupCosineSchedule(optimizer,warmup_step,totals)
     else:
         scheduler = None
-    all_labels = np.zeros([len(train_unlabeled_set), 33])
+    all_labels = np.zeros([len(train_unlabeled_set), 34])
     # optionally resume from a checkpoint
     title = dataset
     if args.resume:
