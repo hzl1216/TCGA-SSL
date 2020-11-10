@@ -101,7 +101,7 @@ def split_geo(geo_data, annotation_path):
 
     features_g = np.array(geo_table.iloc[:, 1:])
     features_g = features_g[:, idx_g]
-    features = feature_name_g[idx_g]
+    feature_name = np.array(feature_name_g)[idx_g]
     # numpy is different from lis
 
     print('remove the features that  Variance is low than threshold')
@@ -109,7 +109,7 @@ def split_geo(geo_data, annotation_path):
     selector.fit(feature_name_g)
     idx2 = selector.get_support(indices=True)
     features_g = features_g[:, idx2]
-    feature_name = np.array(features)[idx2]
+    feature_name = np.array(feature_name)[idx2]
 
     kf = KFold(n_splits=5, shuffle=True, random_state=13)
     scaler = preprocessing.MinMaxScaler().fit(features_g)
