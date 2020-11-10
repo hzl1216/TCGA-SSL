@@ -13,7 +13,7 @@ def main(dataset):
             ema='EMA ' if ema else ''))
 
 #        model = TCN(input_size=1, output_size=33, num_channels=[32] *8, kernel_size=2)
-        model = ResNet50(33)
+        model = ResNet50(34)
         model.cuda()
         if ema:
             for param in model.parameters():

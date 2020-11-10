@@ -127,11 +127,11 @@ def get_datasets(root, index, n_labeled, transform_train=None, transform_strong=
         train_unlabeled_idxs = []
         other_idxs=[]
         if randomtype == 'type':
-            for i in range(33):
+            for i in range(34):
                 idxs = np.where(labels == i)[0]
                 np.random.shuffle(idxs)
-                train_labeled_idxs.extend(idxs[:10])
-                other_idxs.extend(idxs[10:])
+                train_labeled_idxs.extend(idxs[:5])
+                other_idxs.extend(idxs[5:])
             np.random.shuffle(other_idxs)
             length = n_labeled-len(train_labeled_idxs)
             train_labeled_idxs.extend(other_idxs[:length])
