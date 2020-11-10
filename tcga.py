@@ -67,7 +67,7 @@ def main(dataset):
         scheduler =  WarmupCosineSchedule(optimizer,warmup_step,totals)
     else:
         scheduler = None
-    all_labels = np.zeros([len(train_unlabeled_set), 10])
+    all_labels = np.zeros([len(train_unlabeled_set), 33])
     # optionally resume from a checkpoint
     title = dataset
     if args.resume:
