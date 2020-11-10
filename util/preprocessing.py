@@ -141,8 +141,8 @@ def normalise_and_save(features, feature_name, labels, scaler=None, file_path='t
 if __name__ == '__main__':
 # feature_selection_and_sort_by_chromosome('data/TCGA_data.csv','data/Annotation.csv')
 #   merge_geo_tcga('data/big_gene_expression_data.csv', 'data/big_data_xiong.csv', 'data/Annotation.csv')
- #   split_geo( 'data/big_data_xiong.csv', 'data/Annotation.csv')
-    split_geo('D:/GEO数据/big_data_xiong.csv', 'D:/TCGA-DATA/Annotation.csv')
+    split_geo( 'data/big_data_xiong.csv', 'data/Annotation.csv')
+ #   split_geo('D:/GEO数据/big_data_xiong.csv', 'D:/TCGA-DATA/Annotation.csv')
 
 
 
