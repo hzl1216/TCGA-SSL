@@ -312,3 +312,71 @@ def scheduler(epoch, totals=None, start=0.0, end=1.0):
 def get_unsup_size(epoch):
     size = int(min(args.mixup_size, args.unsup_ratio) * args.batch_size * scheduler(epoch))
     return size
+
+
+def train(train_labeled_loader, model, ema_model, optimizer, ema_optimizer, epoch, criterion, scheduler=None):
+    labeled_train_iter = iter(train_labeled_loader)
+
+    meters = AverageMeterSet()
+
+    # switch to train mode
+    model.train()
+    ema_model.train()
+    end = time.time()
+    for i in range(args.epoch_iteration):
+        try:
+            inputs_x, targets_x, label_index = labeled_train_iter.next()
+        except:
+            labeled_train_iter = iter(train_labeled_loader)
+            inputs_x, targets_x, label_index = labeled_train_iter.next()
+
+        # measure data loading time
+        meters.update('data_time', time.time() - end)
+        inputs_x = inputs_x.cuda()
+
+        batch_size = inputs_x.size(0)
+        targets_x_onehot = torch.zeros(batch_size, 33).scatter_(1, targets_x.view(-1, 1), 1)
+        targets_x = targets_x.cuda(non_blocking=True)
+
+        if args.mixup:
+            targets_x = targets_x_onehot.cuda(non_blocking=True)
+            l = np.random.beta(args.alpha, args.alpha)
+            idx = torch.randperm(targets_x.size(0))
+            input_a, input_b = inputs_x, inputs_x[idx]
+            target_a, target_b = targets_x, targets_x[idx]
+
+            mixed_input = l * input_a + (1 - l) * input_b
+            mixed_target = l * target_a + (1 - l) * target_b
+
+            outputs = model(mixed_input)
+
+            #            loss_mask = torch.max(outputs,dim=1)[0].gt(args.tsa).float().detach()
+            loss = -torch.mean(torch.sum(F.log_softmax(outputs, dim=1) * mixed_target, dim=1))
+        #            loss = criterion(outputs,mixed_target)
+        else:
+            targets_x = targets_x_onehot.cuda(non_blocking=True)
+            outputs = model(inputs_x)
+            loss, class_loss, consistency_loss = criterion(outputs, outputs)
+        meters.update('loss', loss.item())
+
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        ema_optimizer.step()
+        if scheduler is not None:
+            scheduler.step()
+        # measure elapsed time
+        meters.update('batch_time', time.time() - end)
+        end = time.time()
+
+        if i % args.print_freq == 0:
+            print(
+                'Epoch: [{0}][{1}/{2}]\t'
+                'Time {meters[batch_time]:.3f}\t'
+                'Data {meters[data_time]:.3f}\t'
+                'Class {meters[loss]:.4f}\t'.format(
+                    epoch, i, args.epoch_iteration, meters=meters))
+
+    ema_optimizer.step(bn=True)
+    return meters.averages()['loss/avg']
