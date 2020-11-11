@@ -335,7 +335,7 @@ def train(train_labeled_loader, model, ema_model, optimizer, ema_optimizer, epoc
         inputs_x = inputs_x.cuda()
 
         batch_size = inputs_x.size(0)
-        targets_x_onehot = torch.zeros(batch_size, 33).scatter_(1, targets_x.view(-1, 1), 1)
+        targets_x_onehot = torch.zeros(batch_size, 34).scatter_(1, targets_x.view(-1, 1), 1)
         targets_x = targets_x.cuda(non_blocking=True)
 
         if args.mixup:
