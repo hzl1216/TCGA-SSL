@@ -95,12 +95,12 @@ def main(dataset):
     for epoch in range(args.start_epoch, args.epochs):
         start_time = time.time()
         # train for one epoch
-        # class_loss, cons_loss,all_labels = train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer, ema_optimizer,all_labels, epoch, scheduler)
-        # if epoch >= args.ema_stage:
-        #     all_labels = get_u_label(ema_model, train_unlabeled_loader2,all_labels)
-        cons_loss = 0
-        class_loss = train(train_labeled_loader, model, ema_model, optimizer, ema_optimizer, epoch, criterion,
-                           scheduler)
+        class_loss, cons_loss,all_labels = train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model,optimizer, ema_optimizer,all_labels, epoch, scheduler)
+        if epoch >= args.ema_stage:
+            all_labels = get_u_label(ema_model, train_unlabeled_loader2,all_labels)
+        # cons_loss = 0
+        # class_loss = train(train_labeled_loader, model, ema_model, optimizer, ema_optimizer, epoch, criterion,
+        #                    scheduler)
 
         print("--- training epoch in %s seconds ---" % (time.time() - start_time))
 

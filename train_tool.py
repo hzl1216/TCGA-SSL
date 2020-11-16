@@ -335,11 +335,9 @@ def train(train_labeled_loader, model, ema_model, optimizer, ema_optimizer, epoc
         inputs_x = inputs_x.cuda()
 
         batch_size = inputs_x.size(0)
-        targets_x_onehot = torch.zeros(batch_size, 34).scatter_(1, targets_x.view(-1, 1), 1)
-        targets_x = targets_x.cuda(non_blocking=True)
+        targets_x = torch.zeros(batch_size, 34).scatter_(1, targets_x.view(-1, 1), 1).cuda(non_blocking=True)
 
         if args.mixup:
-            targets_x = targets_x_onehot.cuda(non_blocking=True)
             l = np.random.beta(args.alpha, args.alpha)
             idx = torch.randperm(targets_x.size(0))
             input_a, input_b = inputs_x, inputs_x[idx]
@@ -350,13 +348,11 @@ def train(train_labeled_loader, model, ema_model, optimizer, ema_optimizer, epoc
 
             outputs = model(mixed_input)
 
-            #            loss_mask = torch.max(outputs,dim=1)[0].gt(args.tsa).float().detach()
             loss = -torch.mean(torch.sum(F.log_softmax(outputs, dim=1) * mixed_target, dim=1))
-        #            loss = criterion(outputs,mixed_target)
+
         else:
-            targets_x = targets_x_onehot.cuda(non_blocking=True)
             outputs = model(inputs_x)
-            loss, class_loss, consistency_loss = criterion(outputs, outputs)
+            loss = -torch.mean(torch.sum(F.log_softmax(outputs, dim=1) * targets_x, dim=1))
         meters.update('loss', loss.item())
 
         # compute gradient and do SGD step
