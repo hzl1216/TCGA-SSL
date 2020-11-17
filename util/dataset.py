@@ -94,18 +94,15 @@ class RandomErasing(object):
     -------------------------------------------------------------------------------------
     '''
 
-    def __init__(self, probability=0.5, sl=0.05, sh=0.1, erasing_value=0):
+    def __init__(self, probability=0.5, length=0.2, erasing_value=0):
         self.probability = probability
         self.erasing_value = erasing_value
-        self.sl = sl
-        self.sh = sh
+        self.length = length
     def __call__(self, data):
         if random.uniform(0, 1) > self.probability:
             return data
-        length = len(data)
-        erasing_length = int(random.uniform(self.sl, self.sh) * length)
-        x = random.randint(0, length - erasing_length)
-        data[x:x+erasing_length] = self.erasing_value
+        x = random.randint(0, len(data) - self.length)
+        data[x:x+self.length] = self.erasing_value
         return data
 
 class GaussianNoise(object):
