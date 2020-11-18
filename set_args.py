@@ -3,18 +3,18 @@ import logging
 from util.utils import str2bool
 def create_parser():
     parser = argparse.ArgumentParser(description='PyTorch tcga Training')
-    parser.add_argument('--epochs', default=100, type=int, metavar='N',
+    parser.add_argument('--epochs', default=150, type=int, metavar='N',
                         help='number of total epochs to run')
     parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                         help='manual epoch number (useful on restarts)')
-    parser.add_argument('--batch-size', default=32, type=int,
+    parser.add_argument('--batch-size', default=64, type=int,
                         metavar='N', help='labeled-batch size')
     parser.add_argument('--unsup-ratio', default=5, type=int,
                         metavar='N', help='The ratio between batch size of unlabeled data and labeled data')
     parser.add_argument('--lr', '--learning-rate', default=0.03, type=float)
     parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float,
                         metavar='W', help='weight decay (default: 1e-4)')
-    parser.add_argument('--ema-decay', default=0.99, type=float, metavar='ALPHA',
+    parser.add_argument('--ema-decay', default=0.999, type=float, metavar='ALPHA',
                         help='ema variable decay rate (default: 0.999)')
     parser.add_argument('--consistency-weight', default=0.0, type=float, metavar='WEIGHT',
                         help='use consistency loss with given weight (default: None)')
@@ -34,15 +34,15 @@ def create_parser():
                         help='path to latest checkpoint (default: none)')
     parser.add_argument('--out_path', default='result',
                         help='Directory to output the result')
-    parser.add_argument('--n-labeled', type=int, default=1000,
+    parser.add_argument('--n-labeled', type=int, default=4000,
                         help='Number of labeled data')
     parser.add_argument('-e', '--evaluate', type=bool,
                         help='evaluate model on evaluation set')
     parser.add_argument('--num-workers', type=int, default=12,
                         help='Number of workers')
-    parser.add_argument('--epoch-iteration', type=int, default=512,
+    parser.add_argument('--epoch-iteration', type=int, default=1024,
                         help='train step of one epoch')
-    parser.add_argument('--warmup-step', type=int, default=5,
+    parser.add_argument('--warmup-step', type=int, default=10,
                         help='Number of workers')
     parser.add_argument('--alpha', default=0.75, type=float)
     parser.add_argument('--mixup', default=True, type=str2bool,
@@ -61,5 +61,4 @@ def create_parser():
     parser.add_argument('--index', type=int, default=0)
     parser.add_argument('--geo', default=False, type=str2bool,
                         help='use geo dataset as unlabeled set', metavar='BOOL')
-    parser.add_argument('--softmax-temp', default=0.4, type=float, metavar='softmax-temp')
     return parser.parse_args()

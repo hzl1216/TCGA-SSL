@@ -112,7 +112,7 @@ def split_geo(geo_data, annotation_path):
     feature_name = np.array(feature_name)[idx2]
 
     kf = KFold(n_splits=5, shuffle=True, random_state=13)
-    scaler = preprocessing.StandardScaler().fit(features_g)
+    scaler = preprocessing.MinMaxScaler().fit(features_g)
 
     for index, (train_index, test_index) in enumerate(kf.split(features_g)):
         x_train, x_test, y_train, y_test = features_g[train_index], features_g[test_index],labels[train_index], labels[test_index]
