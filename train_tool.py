@@ -48,7 +48,7 @@ def train_semi(train_labeled_loader, train_unlabeled_loader, model, ema_model, o
         inputs_std = inputs_std.cuda()
 
         batch_size = inputs_x.size(0)
-        targets_x = torch.zeros(batch_size, 10).scatter_(1, targets_x.view(-1, 1), 1).cuda(non_blocking=True)
+        targets_x = torch.zeros(batch_size, 34).scatter_(1, targets_x.view(-1, 1), 1).cuda(non_blocking=True)
 
         targets_u = torch.FloatTensor(all_labels[unlabel_index, :]).cuda()
         targets_u = sharpen(targets_u)
