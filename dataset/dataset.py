@@ -101,7 +101,7 @@ class RandomErasing(object):
     def __call__(self, data):
         if random.uniform(0, 1) > self.probability:
             return data
-        length = self.length * len(data)
+        length = int(self.length * len(data))
         x = random.randint(0,len(data)-length)
         data[x:x+length] = self.erasing_value
         return data
