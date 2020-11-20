@@ -3,13 +3,13 @@ import logging
 from util.utils import str2bool
 def create_parser():
     parser = argparse.ArgumentParser(description='PyTorch tcga Training')
-    parser.add_argument('--epochs', default=150, type=int, metavar='N',
+    parser.add_argument('--epochs', default=200, type=int, metavar='N',
                         help='number of total epochs to run')
     parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                         help='manual epoch number (useful on restarts)')
     parser.add_argument('--batch-size', default=64, type=int,
                         metavar='N', help='labeled-batch size')
-    parser.add_argument('--unsup-ratio', default=5, type=int,
+    parser.add_argument('--unsup-ratio', default=7, type=int,
                         metavar='N', help='The ratio between batch size of unlabeled data and labeled data')
     parser.add_argument('--lr', '--learning-rate', default=0.03, type=float)
     parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float,
@@ -55,7 +55,7 @@ def create_parser():
     parser.add_argument('--ema-stage', type=int, default=10)
     parser.add_argument('--optimizer', type=str, default='sgd')
     parser.add_argument('--val-size', type=int, default=-1)
-    parser.add_argument('--mixup-size', type=int, default=5)
+    parser.add_argument('--mixup-size', type=int, default=7)
     parser.add_argument('--tsa', type=int, default=0.9)
     parser.add_argument('--dataset', type=str, default='tcga')
     parser.add_argument('--index', type=int, default=0)

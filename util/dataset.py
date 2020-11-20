@@ -101,8 +101,9 @@ class RandomErasing(object):
     def __call__(self, data):
         if random.uniform(0, 1) > self.probability:
             return data
-        x = random.randint(0, len(data) - self.length)
-        data[x:x+self.length] = self.erasing_value
+        length = self.length * len(data)
+        x = random.randint(0,len(data)-length)
+        data[x:x+length] = self.erasing_value
         return data
 
 class GaussianNoise(object):
@@ -118,27 +119,16 @@ class GaussianNoise(object):
         return x
 
 def get_datasets(root, index, n_labeled, transform_train=None, transform_strong=None,transform_val=None, withGeo=False):
-    def train_val_split_random(labels, n_labeled, randomtype='type'):
-
+    def train_val_split(labels, n_labeled, classes=34):
+        labels = np.array(labels)
         train_labeled_idxs = []
-        train_unlabeled_idxs = []
-        other_idxs=[]
-        if randomtype == 'type':
-            for i in range(34):
-                idxs = np.where(labels == i)[0]
-                np.random.shuffle(idxs)
-                train_labeled_idxs.extend(idxs[:5])
-                other_idxs.extend(idxs[5:])
-            np.random.shuffle(other_idxs)
-            length = n_labeled-len(train_labeled_idxs)
-            train_labeled_idxs.extend(other_idxs[:length])
-            train_unlabeled_idxs.extend(other_idxs[length:])
-        else:
-            length = len(labels)
-            idxs = np.array([i for i in range(length)])
-            np.random.shuffle(idxs)
-            train_labeled_idxs.extend(idxs[:n_labeled])
-            train_unlabeled_idxs.extend(idxs[n_labeled:])
+        train_unlabeled_idxs = np.array(range(len(labels)))
+
+        for i in range(classes):
+            idx = np.where(labels == i)[0]
+            idx = np.random.choice(idx, n_labeled // classes, False)
+            train_labeled_idxs.extend(idx)
+
         np.random.shuffle(train_labeled_idxs)
         np.random.shuffle(train_unlabeled_idxs)
 
@@ -150,7 +140,7 @@ def get_datasets(root, index, n_labeled, transform_train=None, transform_strong=
         train_unlabeled_dataset = TCGA_DATASET(root, transform=TransformTwice(transform_train,transform_strong),isGeo=True)
         train_unlabeled_dataset2 = TCGA_DATASET(root, transform=transform_val,isGeo=True)
     else:
-        train_labeled_idxs, train_unlabeled_idxs = train_val_split_random(base_dataset.targets, n_labeled)
+        train_labeled_idxs, train_unlabeled_idxs = train_val_split(base_dataset.targets, n_labeled)
         train_labeled_dataset = TCGA_labeled(base_dataset, train_labeled_idxs,  transform=transform_train)
         train_unlabeled_dataset = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=TransformTwice(transform_train,transform_strong))
         train_unlabeled_dataset2 = TCGA_unlabeled(base_dataset, train_unlabeled_idxs,  transform=transform_val)
