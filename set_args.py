@@ -1,6 +1,5 @@
 import argparse
-import logging
-from util.utils import str2bool
+from utils import str2bool
 def create_parser():
     parser = argparse.ArgumentParser(description='PyTorch tcga Training')
     parser.add_argument('--epochs', default=200, type=int, metavar='N',

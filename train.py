@@ -3,12 +3,13 @@ import torchvision.transforms as transforms
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data as data
-import numpy as np
-from util.dataset import get_datasets,RandomErasing,GaussianNoise,ToTensor
-from util.ema import ModelEMA
+from dataset.dataset import get_datasets,RandomErasing,GaussianNoise,ToTensor
+from models.ema import ModelEMA
 from set_args import create_parser
-from util.utils import *
-from util.net import ResNet50,TCN
+from utils import *
+from models.net import ResNet50
+
+
 def main(dataset):
     def create_model(ema=False):
         print("=> creating {ema}model ".format(
