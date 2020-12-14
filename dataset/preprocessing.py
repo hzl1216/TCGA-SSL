@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn import preprocessing  
 from collections import Counter
+
 def feature_selection_and_sort_by_chromosome(data, annotation_path):
     big_table = pd.read_csv(data)
     feature_name = list(big_table)
@@ -43,7 +44,6 @@ def merge_geo_tcga(tcga_data, geo_data, annotation_path):
     tcga_table = pd.read_csv(tcga_data)
     geo_table = pd.read_csv(geo_data)
     feature_name_t = list(tcga_table)[1:]
-    feature_name_t = [feature.split('|')[0] for feature in feature_name_t]
     feature_name_g = list(geo_table)[1:]
     labels = np.array(tcga_table.iloc[:, 0])
     annotation = pd.read_csv(annotation_path, dtype=str)
@@ -59,7 +59,6 @@ def merge_geo_tcga(tcga_data, geo_data, annotation_path):
     feature_name = np.array(feature_name_t)[idx_t]
 
     features_t = np.array(tcga_table.iloc[:, 1:])
-    features_t = np.log2(1.0 + features_t)
     features_t[np.where(features_t <= 1)] = 0
     features_t = features_t[:, idx_t]
 
@@ -89,17 +88,19 @@ def merge_geo_tcga(tcga_data, geo_data, annotation_path):
 
 def split_geo(geo_data, annotation_path):
     geo_table = pd.read_csv(geo_data)
-    feature_name_g = list(geo_table)[1:]
+    feature_name_g = list(geo_table)[2:]
     annotation = pd.read_csv(annotation_path, dtype=str)
     gene_id_annotation = list(annotation.loc[:, "gene"])
-    labels = np.array(geo_table.iloc[:, 0])
+    labels = np.array(geo_table.iloc[:, 1])
+    print(feature_name_g)
+    print(labels)
     idx_g = []
     print('features have been sorted based on chromosome')
     for gene_id in gene_id_annotation:
         if gene_id in feature_name_g:
             idx_g.append(feature_name_g.index(gene_id))
 
-    features_g = np.array(geo_table.iloc[:, 1:])
+    features_g = np.array(geo_table.iloc[:, 2:])
     features_g = features_g[:, idx_g]
     feature_name = np.array(feature_name_g)[idx_g]
     # numpy is different from lis
@@ -139,9 +140,9 @@ def normalise_and_save(features, feature_name, labels, scaler=None, file_path='t
 
 
 if __name__ == '__main__':
-# feature_selection_and_sort_by_chromosome('data/TCGA_data.csv','data/Annotation.csv')
-#   merge_geo_tcga('data/big_gene_expression_data.csv', 'data/big_data_xiong.csv', 'data/Annotation.csv')
-    split_geo( 'data/big_data_xiong.csv', 'data/Annotation.csv')
+#     feature_selection_and_sort_by_chromosome('data/TCGA_data.csv','data/Annotation.csv')
+    merge_geo_tcga('data/tcga.csv', 'data/geo.csv', 'data/Annotation.csv')
+#     split_geo( 'data/ALL_data.csv', 'data/Annotation.csv')
  #   split_geo('D:/GEO数据/big_data_xiong.csv', 'D:/TCGA-DATA/Annotation.csv')
 
 

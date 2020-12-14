@@ -36,8 +36,9 @@ class TCGA_DATASET(data.Dataset):
         self.data = []
         self.targets= []
         if isGeo:
-            df = pd.read_csv(root + '/geo_data.csv')
-            self.data = np.array(df)
+            df1 = pd.read_csv(root + '/geo_data.csv')
+            df2 = pd.read_csv(root + '/train_%d.csv' % index)
+            self.data = np.concatenate([np.array(df1),np.array(df2.iloc[:, 1:])], axis=0)
             self.targets = np.array([-1 for _ in range(len(self.data))])
         else:
             if train:
@@ -46,7 +47,7 @@ class TCGA_DATASET(data.Dataset):
                 df = pd.read_csv(root+'/test_%d.csv'%index)
 
             self.data = np.array(df.iloc[:, 1:])
-            self.targets = np.array(df.iloc[:, 0]-1)
+            self.targets = np.array(df.iloc[:, 0])
 
     def __getitem__(self, index):
         data = self.data[index]
@@ -118,16 +119,19 @@ class GaussianNoise(object):
         x += np.random.randn(length) * 0.15
         return x
 
-def get_datasets(root, index, n_labeled, transform_train=None, transform_strong=None,transform_val=None, withGeo=False):
-    def train_val_split(labels, n_labeled, classes=34):
-        labels = np.array(labels)
+def get_datasets(root, index, n_labeled, n_class, transform_train=None, transform_strong=None,transform_val=None, withGeo=False):
+    def train_val_split(labels, n_labeled, classes=n_class):
         train_labeled_idxs = []
         train_unlabeled_idxs = np.array(range(len(labels)))
-
+        other_idxs = []
         for i in range(classes):
-            idx = np.where(labels == i)[0]
-            idx = np.random.choice(idx, n_labeled // classes, False)
-            train_labeled_idxs.extend(idx)
+            idxs = np.where(labels == i)[0]
+            np.random.shuffle(idxs)
+            train_labeled_idxs.extend(idxs[:10])
+            other_idxs.extend(idxs[10:])
+        np.random.shuffle(other_idxs)
+        length = n_labeled - len(train_labeled_idxs)
+        train_labeled_idxs.extend(other_idxs[:length])
 
         np.random.shuffle(train_labeled_idxs)
         np.random.shuffle(train_unlabeled_idxs)

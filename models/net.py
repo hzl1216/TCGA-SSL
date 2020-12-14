@@ -186,4 +186,4 @@ class ResNet(nn.Module):
 
 
 def ResNet50(num_classes):
-    return ResNet([3, 4, 6, 3],num_classes)
+    return ResNet([3, 4, 6, 3], num_classes)
